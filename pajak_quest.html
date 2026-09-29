@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5b21b6">
+<title>Pajak Quest — Misi Menyelamatkan Usaha</title>
+<style>
+:root{
+  --primary:#6d28d9;--primary2:#8b5cf6;--dark:#172033;--muted:#64748b;
+  --bg:#f5f3ff;--card:#fff;--ok:#15803d;--bad:#dc2626;--warn:#b45309;
+  --line:#e2e8f0;--shadow:0 10px 30px rgba(30,20,70,.10);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--dark)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+.app{min-height:100vh}
+header{background:linear-gradient(135deg,#4c1d95,#7c3aed);color:white;padding:18px 16px;position:sticky;top:0;z-index:10;box-shadow:0 5px 20px #2e106533}
+.topbar{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:900;font-size:20px}.brand small{display:block;font-size:11px;opacity:.8;font-weight:500}
+.score{background:#ffffff20;padding:8px 12px;border-radius:12px;font-weight:800}
+main{max-width:1100px;margin:0 auto;padding:20px 14px 50px}
+.hero{background:linear-gradient(135deg,#ede9fe,#fff);border:1px solid #ddd6fe;border-radius:24px;padding:26px;box-shadow:var(--shadow);margin-bottom:18px}
+.hero h1{margin:0 0 8px;font-size:clamp(26px,5vw,42px)}
+.hero p{margin:0;color:#475569;max-width:760px;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.mission{position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:space-between}
+.mission.locked{opacity:.55}.mission .num{font-size:12px;font-weight:800;color:var(--primary)}
+.mission h3{margin:6px 0}.mission p{color:var(--muted);font-size:14px;line-height:1.45}
+.btn{padding:11px 15px;border-radius:12px;background:var(--primary);color:white;font-weight:800}
+.btn:hover{background:#5b21b6}.btn.secondary{background:#ede9fe;color:#5b21b6}.btn.success{background:#15803d}
+.btn.danger{background:#dc2626}.btn.ghost{background:#f8fafc;color:#334155;border:1px solid var(--line)}
+.progress{height:10px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin:12px 0}
+.progress>span{display:block;height:100%;background:linear-gradient(90deg,#7c3aed,#a78bfa);width:0;transition:.3s}
+.panel{background:white;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow)}
+.back{margin-bottom:14px}
+.notice{padding:13px 15px;border-radius:13px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;margin:12px 0;line-height:1.5}
+.info{padding:13px 15px;border-radius:13px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;margin:12px 0;line-height:1.5}
+.successbox{padding:13px 15px;border-radius:13px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;margin:12px 0}
+.errorbox{padding:13px 15px;border-radius:13px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;margin:12px 0}
+.optiongrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:15px 0}
+.option{padding:14px;border:2px solid var(--line);border-radius:14px;background:#fff;text-align:left}
+.option:hover{border-color:#a78bfa;background:#faf5ff}.option.selected{border-color:var(--primary);background:#f5f3ff}
+label{font-weight:750;font-size:14px;display:block;margin:10px 0 6px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:11px;background:white;outline:none}
+input:focus,select:focus,textarea:focus{border-color:#8b5cf6;box-shadow:0 0 0 3px #8b5cf622}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+table{border-collapse:collapse;width:100%;min-width:650px}th,td{padding:11px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}th{background:#f8fafc}
+.drags{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:15px}
+.dragzone{min-height:170px;padding:12px;background:#f8fafc;border:2px dashed #cbd5e1;border-radius:15px}
+.item{padding:12px;background:white;border:1px solid var(--line);border-radius:12px;margin:8px 0;box-shadow:0 3px 8px #00000008;cursor:grab}
+.item small{display:block;color:var(--muted);margin-top:3px}
+.badge{display:inline-block;padding:5px 9px;border-radius:99px;background:#ede9fe;color:#5b21b6;font-size:12px;font-weight:800}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.receipt{background:#fff;border:1px dashed #94a3b8;padding:18px;border-radius:8px;font-family:ui-monospace,monospace;max-width:560px;margin:auto}
+.receipt h3{text-align:center;margin-top:0}.line{border-top:1px dashed #94a3b8;margin:12px 0}
+.resultScore{font-size:52px;font-weight:950;color:var(--primary);text-align:center}
+.mini{font-size:12px;color:var(--muted)}
+.footer{text-align:center;color:#64748b;font-size:12px;margin-top:25px}
+.hidden{display:none!important}
+@media(max-width:650px){
+  header{position:relative}.hero{padding:20px}.panel{padding:15px}
+  .drags{grid-template-columns:1fr}.topbar{align-items:flex-start}
+  .score{font-size:13px}.grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="topbar">
+    <div class="brand">💼 PAJAK QUEST <small>Misi Menyelamatkan Usaha</small></div>
+    <div class="score">⭐ Skor: <span id="score">0</span></div>
+  </div>
+</header>
+
+<main>
+<section id="home">
+  <div class="hero">
+    <span class="badge">KONSULTAN PAJAK JUNIOR</span>
+    <h1>Selamatkan Raka Gadget & Accessories! 🚀</h1>
+    <p>Raka meminta bantuanmu karena administrasi pajaknya berantakan. Pecahkan 6 misi: kenali wajib pajak, bongkar transaksi, hitung pajak, periksa faktur, isi SPT virtual, lalu ambil keputusan.</p>
+    <div class="progress"><span id="progress"></span></div>
+    <div class="mini"><span id="doneCount">0</span>/6 misi selesai</div>
+  </div>
+  <div class="grid" id="missions"></div>
+  <div class="footer">Prototipe pembelajaran • Data kasus bersifat fiktif • Ketentuan tarif/parameter harus diverifikasi ke DJP sebelum dipakai sebagai materi resmi.</div>
+</section>
+
+<section id="game" class="hidden">
+  <button class="btn ghost back" onclick="goHome()">← Kembali ke Dashboard</button>
+  <div id="gameContent"></div>
+</section>
+</main>
+</div>
+
+<script>
+const state={
+  score:0, done:new Set(), answers:{}, username:"",
+  pph21Base:6500000, pph21Rate:0.05, ppnPrice:2750000
+};
+
+const missions=[
+ {id:1,title:"Kenali Wajib Pajak",icon:"🪪",desc:"Kenali Raka, identitas perpajakan, serta hak dan kewajibannya."},
+ {id:2,title:"Bongkar Transaksi",icon:"🔎",desc:"Klasifikasikan transaksi usaha Raka berdasarkan perlakuan pajaknya."},
+ {id:3,title:"Hitung Pajak",icon:"🧮",desc:"Hitung simulasi PPh 21 dan PPN dengan parameter yang tersedia."},
+ {id:4,title:"Periksa Faktur",icon:"🧾",desc:"Cari kesalahan pada dokumen faktur digital."},
+ {id:5,title:"SPT Virtual",icon:"📄",desc:"Lengkapi formulir pelaporan berdasarkan data kasus."},
+ {id:6,title:"Keputusan Akhir",icon:"⚖️",desc:"Tentukan tindakan yang tepat ketika kewajiban pajak terlambat."}
+];
+
+function rupiah(n){return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n)}
+function save(){localStorage.setItem("pajakQuest",JSON.stringify({...state,done:[...state.done]}))}
+function load(){
+  try{
+    const x=JSON.parse(localStorage.getItem("pajakQuest"));
+    if(x){state.score=x.score||0;state.answers=x.answers||{};state.username=x.username||"";state.done=new Set(x.done||[])}
+  }catch(e){}
+}
+function renderHome(){
+  document.getElementById("score").textContent=state.score;
+  document.getElementById("doneCount").textContent=state.done.size;
+  document.getElementById("progress").style.width=(state.done.size/6*100)+"%";
+  document.getElementById("missions").innerHTML=missions.map(m=>{
+    const complete=state.done.has(m.id);
+    const locked=m.id>1&&!state.done.has(m.id-1);
+    return `<div class="card mission ${locked?'locked':''}">
+      <div><div class="num">MISI ${m.id} ${complete?'✅':''}</div><h3>${m.icon} ${m.title}</h3><p>${m.desc}</p></div>
+      <button class="btn ${complete?'secondary':''}" ${locked?'disabled':''} onclick="openMission(${m.id})">${locked?'🔒 Terkunci':complete?'🔁 Ulangi':'Mulai Misi'}</button>
+    </div>`
+  }).join("");
+}
+function goHome(){document.getElementById("game").classList.add("hidden");document.getElementById("home").classList.remove("hidden");renderHome()}
+function openMission(id){
+  document.getElementById("home").classList.add("hidden");document.getElementById("game").classList.remove("hidden");
+  const f=[mission1,mission2,mission3,mission4,mission5,mission6][id-1]; f();
+}
+function complete(id,points,msg="Misi selesai!"){
+  if(!state.done.has(id)){state.score+=points;state.done.add(id);state.answers["m"+id]=true;save()}
+  document.getElementById("gameContent").innerHTML+=`<div class="successbox"><b>🎉 ${msg}</b><br>+${points} poin (poin tidak bertambah jika misi dimainkan ulang).</div>
+  <div class="actions"><button class="btn" onclick="goHome()">Kembali ke Dashboard</button>${id<6?`<button class="btn secondary" onclick="openMission(${id+1})">Lanjut ke Misi ${id+1} →</button>`:""}</div>`;
+  renderHome();
+}
+function setContent(html){document.getElementById("gameContent").innerHTML=html}
+
+function mission1(){
+ setContent(`<div class="panel"><span class="badge">MISI 1 • 15 POIN</span><h2>🪪 Kenali Wajib Pajak</h2>
+ <div class="info"><b>Profil:</b> Raka, pemilik Raka Gadget & Accessories, menjual aksesori HP melalui marketplace. Ia memiliki satu karyawan dan memakai jasa freelancer desain.</div>
+ <h3>1. Siapa yang menjadi subjek utama dalam kasus ini?</h3>
+ <div class="optiongrid">
+  <button class="option" onclick="pick(this,'raka')">Raka sebagai pemilik usaha</button>
+  <button class="option" onclick="pick(this,'marketplace')">Marketplace</button>
+  <button class="option" onclick="pick(this,'pelanggan')">Semua pelanggan</button>
+ </div>
+ <h3>2. Pernyataan mana yang paling tepat?</h3>
+ <div class="optiongrid">
+  <button class="option" onclick="pick(this,'identitas')">Identitas perpajakan perlu dipastikan sesuai ketentuan administrasi perpajakan yang berlaku.</button>
+  <button class="option" onclick="pick(this,'bebas')">Pemilik usaha otomatis bebas dari kewajiban pajak.</button>
+  <button class="option" onclick="pick(this,'market')">Semua pajak menjadi tanggung jawab marketplace.</button>
+ </div>
+ <div class="actions"><button class="btn" onclick="check1()">Periksa Jawaban</button></div></div>`)
+}
+function pick(el,val){el.parentElement.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));el.classList.add("selected");el.parentElement.dataset.value=val}
+function check1(){
+ const boxes=document.querySelectorAll(".optiongrid"),a=boxes[0].dataset.value,b=boxes[1].dataset.value;
+ if(a==="raka"&&b==="identitas") complete(1,15,"Kamu berhasil mengenali pihak dan isu administrasi yang perlu diperiksa.");
+ else document.getElementById("gameContent").innerHTML+=`<div class="errorbox">Belum tepat. Perhatikan siapa yang menjalankan usaha dan jangan menganggap marketplace otomatis menggantikan seluruh kewajiban penjual.</div>`;
+}
+
+function mission2(){
+ const tx=[
+  ["t1","Gaji karyawan","Gaji bulanan karyawan Rp6.500.000"],
+  ["t2","Honor freelancer","Honor desain Rp1.500.000"],
+  ["t3","Penjualan online","Penjualan aksesori Rp2.750.000 kepada konsumen"],
+  ["t4","Pembelian barang","Pembelian stok dari pemasok Rp1.800.000"],
+  ["t5","Biaya iklan","Iklan marketplace Rp500.000"]
+ ];
+ setContent(`<div class="panel"><span class="badge">MISI 2 • 20 POIN</span><h2>🔎 Bongkar Transaksi</h2>
+ <p>Seret setiap kartu ke kategori yang menurutmu paling tepat untuk <b>pemeriksaan awal</b>. Ini adalah simulasi pembelajaran, bukan penetapan pajak untuk transaksi nyata.</p>
+ <div class="drags">
+  <div><h3>📦 Transaksi</h3><div id="pool" class="dragzone">${tx.map(t=>`<div class="item" draggable="true" data-id="${t[0]}">${t[1]}<small>${t[2]}</small></div>`).join("")}</div></div>
+  <div><h3>🟢 Perlu dianalisis sebagai transaksi perpajakan</h3><div id="tax" class="dragzone" data-cat="tax"></div>
+  <h3>🔴 Bukan fokus pajak langsung dalam misi ini</h3><div id="other" class="dragzone" data-cat="other"></div></div>
+ </div>
+ <div class="notice">Petunjuk: gaji, honor, dan penjualan memiliki isu perpajakan yang perlu diperiksa. Pembelian dan iklan tetap penting untuk pembukuan, tetapi bukan jawaban utama dalam klasifikasi sederhana misi ini.</div>
+ <button class="btn" onclick="check2()">Kunci Klasifikasi</button></div>`);
+ document.querySelectorAll(".item").forEach(x=>x.addEventListener("dragstart",e=>e.dataTransfer.setData("text/plain",x.dataset.id)));
+ document.querySelectorAll(".dragzone").forEach(z=>z.addEventListener("dragover",e=>e.preventDefault()));
+ document.querySelectorAll(".dragzone").forEach(z=>z.addEventListener("drop",e=>{e.preventDefault();let id=e.dataTransfer.getData("text/plain"),el=document.querySelector(`[data-id="${id}"]`);if(el)z.appendChild(el)}));
+}
+function check2(){
+ const tax=[...document.querySelectorAll("#tax .item")].map(x=>x.dataset.id).sort().join(",");
+ const other=[...document.querySelectorAll("#other .item")].map(x=>x.dataset.id).sort().join(",");
+ if(tax==="t1,t2,t3"&&other==="t4,t5") complete(2,20,"Klasifikasi awalmu sudah sesuai dengan fokus misi.");
+ else document.getElementById("gameContent").innerHTML+=`<div class="errorbox">Coba lagi. Dalam misi ini, fokuskan pemeriksaan pajak pada gaji, honor freelancer, dan penjualan.</div>`;
+}
+
+function mission3(){
+ setContent(`<div class="panel"><span class="badge">MISI 3 • 25 POIN</span><h2>🧮 Hitung Pajak</h2>
+ <div class="notice"><b>Catatan penting:</b> PPh 21 nyata menggunakan ketentuan yang bergantung pada jenis penerima penghasilan, periode, status, dan parameter yang berlaku. Untuk menjaga prototipe tetap dapat diperbarui, guru memasukkan tarif simulasi pada kotak berikut. Verifikasi ketentuan resmi DJP sebelum digunakan untuk penilaian nyata.</div>
+ <h3>A. Simulasi PPh 21</h3>
+ <p>Gaji bruto karyawan dalam kasus: <b>${rupiah(state.pph21Base)}</b></p>
+ <label>Tarif simulasi yang diberikan guru (%)</label><input id="rate" type="number" min="0" max="100" step="0.01" value="5">
+ <label>Masukkan hasil perhitungan PPh 21</label><input id="pphAns" type="number" placeholder="Contoh: 325000">
+ <h3>B. Simulasi PPN nonmewah</h3>
+ <p>Harga jual barang: <b>${rupiah(state.ppnPrice)}</b>. Untuk simulasi edukatif ini gunakan rumus 12% × 11/12 × harga jual.</p>
+ <label>Masukkan hasil PPN</label><input id="ppnAns" type="number" placeholder="Hasil rupiah">
+ <div class="actions"><button class="btn" onclick="check3()">Periksa Perhitungan</button></div>
+ <div id="calcFeedback"></div></div>`)
+}
+function check3(){
+ const rate=Number(document.getElementById("rate").value)/100;
+ const pph=Math.round(state.pph21Base*rate);
+ const ppn=Math.round(.12*(11/12)*state.ppnPrice);
+ const a=Number(document.getElementById("pphAns").value),b=Number(document.getElementById("ppnAns").value);
+ if(a===pph&&b===ppn) complete(3,25,`Perhitungan simulasi benar: PPh 21 ${rupiah(pph)} dan PPN ${rupiah(ppn)}.`);
+ else document.getElementById("calcFeedback").innerHTML=`<div class="errorbox">Belum tepat. Untuk parameter yang kamu masukkan, hasil PPh 21 simulasi adalah <b>${rupiah(pph)}</b> dan PPN simulasi adalah <b>${rupiah(ppn)}</b>. Periksa kembali rumus.</div>`;
+}
+
+function mission4(){
+ setContent(`<div class="panel"><span class="badge">MISI 4 • 15 POIN</span><h2>🧾 Periksa Faktur</h2>
+ <p>Raka menerima empat dokumen. Tiga dapat diteruskan untuk pemeriksaan berikutnya, satu sengaja dibuat bermasalah.</p>
+ <div class="grid">
+  <div class="card"><h3>Faktur A</h3><p>Identitas penjual dan pembeli konsisten. Nomor dokumen tersedia.</p><button class="option" onclick="fact(this,false)">✅ Valid untuk simulasi</button></div>
+  <div class="card"><h3>Faktur B</h3><p>Nama pembeli berbeda dengan data transaksi yang diberikan.</p><button class="option" onclick="fact(this,true)">⚠️ Tandai bermasalah</button></div>
+  <div class="card"><h3>Faktur C</h3><p>Data transaksi konsisten dengan bukti penjualan.</p><button class="option" onclick="fact(this,false)">✅ Valid untuk simulasi</button></div>
+  <div class="card"><h3>Faktur D</h3><p>Data transaksi konsisten dengan bukti penjualan.</p><button class="option" onclick="fact(this,false)">✅ Valid untuk simulasi</button></div>
+ </div><div id="factFeedback"></div></div>`)
+}
+let factOk=false;
+function fact(el,isBad){if(isBad){factOk=true;el.classList.add("selected");document.getElementById("factFeedback").innerHTML=`<div class="successbox">Benar. Ketidaksesuaian identitas merupakan tanda yang harus diperiksa sebelum dokumen diteruskan.</div><button class="btn" onclick="complete(4,15,'Kamu menemukan dokumen yang perlu diperiksa lebih lanjut.')">Selesaikan Misi</button>`}else{document.getElementById("factFeedback").innerHTML=`<div class="errorbox">Belum tepat. Cari dokumen dengan ketidaksesuaian data.</div>`}}
+
+function mission5(){
+ setContent(`<div class="panel"><span class="badge">MISI 5 • 15 POIN</span><h2>📄 SPT Virtual</h2>
+ <div class="info">Isi formulir berdasarkan data kasus. Ini hanya simulasi pembelajaran dan bukan formulir pelaporan resmi DJP.</div>
+ <div class="grid">
+  <div><label>Nama Wajib Pajak</label><input id="sNama" value="Raka"></div>
+  <div><label>Identitas perpajakan</label><input id="sId" placeholder="Masukkan NIK/NPWP simulasi"></div>
+  <div><label>Penghasilan usaha bruto</label><input id="sIncome" type="number" placeholder="Contoh: 12000000"></div>
+  <div><label>Status pengisian</label><select id="sStatus"><option value="">-- pilih --</option><option value="lengkap">Data lengkap</option><option value="kosong">Masih ada data kosong</option></select></div>
+ </div>
+ <label>Catatan konsultan</label><textarea id="sNote" rows="3" placeholder="Tuliskan langkah yang perlu dilakukan sebelum pelaporan."></textarea>
+ <button class="btn" onclick="check5()">Validasi Formulir</button><div id="sptFeedback"></div></div>`)
+}
+function check5(){
+ const id=document.getElementById("sId").value.trim(), income=Number(document.getElementById("sIncome").value),status=document.getElementById("sStatus").value,note=document.getElementById("sNote").value.trim();
+ if(id&&income>0&&status==="lengkap"&&note.length>=15) complete(5,15,"Formulir virtual lengkap dan catatanmu menunjukkan langkah pemeriksaan.");
+ else document.getElementById("sptFeedback").innerHTML=`<div class="errorbox">Lengkapi identitas simulasi, penghasilan, status data, dan catatan minimal 15 karakter.</div>`;
+}
+
+function mission6(){
+ setContent(`<div class="panel"><span class="badge">MISI 6 • 10 POIN</span><h2>⚖️ Keputusan Akhir</h2>
+ <div class="notice">Kasus: Raka menyadari ada kewajiban perpajakan yang terlambat. Ia bertanya, “Apa yang harus saya lakukan sekarang?”</div>
+ <h3>Pilih tindakan utama yang paling tepat.</h3>
+ <div class="optiongrid">
+  <button class="option" onclick="pick(this,'a')">Mengabaikannya karena sudah terlambat.</button>
+  <button class="option" onclick="pick(this,'b')">Memeriksa kewajiban, menghitung/menetapkan jumlah yang relevan, menyelesaikan pembayaran/pelaporan sesuai ketentuan, dan mengecek konsekuensi administrasinya.</button>
+  <button class="option" onclick="pick(this,'c')">Menghapus transaksi yang terlambat dari pembukuan.</button>
+ </div>
+ <div class="notice">Nominal sanksi tidak dibuat tetap di prototipe karena ketentuan administrasi dapat berubah dan bergantung pada jenis pelanggaran. Verifikasi ke sumber resmi DJP sebelum memasukkan angka sanksi.</div>
+ <button class="btn" onclick="check6()">Kunci Keputusan</button></div>`)
+}
+function check6(){
+ const a=document.querySelector(".optiongrid").dataset.value;
+ if(a==="b"){complete(6,10,"Keputusanmu menunjukkan langkah kepatuhan yang sistematis tanpa mengabaikan konsekuensi administrasi.")}
+ else document.getElementById("gameContent").innerHTML+=`<div class="errorbox">Belum tepat. Keterlambatan tidak berarti kewajiban dapat diabaikan atau transaksi dihapus.</div>`;
+}
+
+function finishReport(){
+ const pct=Math.round(state.score/100*100);
+ setContent(`<div class="panel"><span class="badge">HASIL AKHIR</span><h2>🏆 PAJAK QUEST SELESAI!</h2><div class="resultScore">${state.score}/100</div>
+ <p style="text-align:center">Konsultan Pajak Junior: <b>${state.username||"Peserta"}</b></p>
+ <div class="grid">
+  <div class="card"><b>Identifikasi</b><br>15 poin</div><div class="card"><b>Klasifikasi</b><br>20 poin</div>
+  <div class="card"><b>Perhitungan</b><br>25 poin</div><div class="card"><b>Faktur</b><br>15 poin</div>
+  <div class="card"><b>SPT</b><br>15 poin</div><div class="card"><b>Keputusan</b><br>10 poin</div>
+ </div>
+ <div class="info"><b>Refleksi:</b> Pajak bukan hanya menghitung angka. Konsultan perlu membaca data, memeriksa dokumen, memahami konteks transaksi, dan mengambil tindakan berdasarkan ketentuan yang berlaku.</div>
+ <button class="btn" onclick="goHome()">Kembali ke Dashboard</button></div>`)
+}
+function start(){
+ load();
+ if(!state.username){
+  const n=prompt("Masukkan nama siswa/kelompok:");
+  state.username=n?.trim()||"Peserta";
+  save();
+ }
+ renderHome();
+}
+start();
+</script>
+</body>
+</html>
